@@ -30,30 +30,8 @@ document.getElementById("addToCart").addEventListener('click',function(){
             document.getElementById("colors").value,
             parseInt(document.getElementById("quantity").value));
 
-           localStorage.setItem('panier' , JSON.stringify(newChoice))`
-            <article class="cart__item" data-id="${newChoice.id}" data-color="${newChoice.color}">
-            <div class="cart__item__img">
-              <img src="${newChoice.imgSrc}" alt="${newChoice.imgAlt}">
-            </div>
-            <div class="cart__item__content">
-              <div class="cart__item__content__description">
-                <h2>${newChoice.name}</h2>
-                <p>${newChoice.color}</p>
-                <p>${newChoice.price}</p>
-              </div>
-              <div class="cart__item__content__settings">
-                <div class="cart__item__content__settings__quantity">
-                  <p>Qté : </p>
-                  <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${newChoice.quantité}">
-                </div>
-                <div class="cart__item__content__settings__delete">
-                  <p class="deleteItem">Supprimer</p>
-                </div>
-              </div>
-            </div>
-          </article>`;
-          console.log(decodeURIComponent(document.cookie).split(';'));
-
+           localStorage.setItem(idProduct + newChoice.color , JSON.stringify(newChoice));
+           console.log(JSON.parse(localStorage.getItem(idProduct+ newChoice.color)))
             
     }else{
         if (document.getElementById("colors").value === ""){
