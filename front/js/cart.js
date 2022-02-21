@@ -1,4 +1,3 @@
-var prixTotal;
 const tableauForm = [
     {title : "firstName",regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
     {title : "lastName", regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
@@ -27,50 +26,77 @@ function get(){
     .then(function(products){
         var prixTotal = 0;
         var quantityTotal = 0;
+        document.getElementById("cart__items").innerHTML = "";
+        document.getElementById("totalPrice").innerText = 0;
+        document.getElementById("totalQuantity").innerText = 0;
         for(let product of products){
             for(let color of product.colors){
-                var panier = JSON.parse(localStorage.getItem(product._id+color));
-                console.log(product._id)
-                console.log(panier);
+                var panier = JSON.parse(localStorage.getItem(product._id+"-"+color));
                 if(panier){
                     document.getElementById("cart__items").innerHTML += 
                         `<article class="cart__item" data-id="${panier.id}" data-color="${panier.color}">
-                        <div class="cart__item__img">
-                        <img src="${product.imageUrl}" alt="${product.altTxt}">
-                        </div>
-                        <div class="cart__item__content">
-                        <div class="cart__item__content__description">
-                            <h2>${product.name}</h2>
-                            <p>${panier.color}</p>
-                            <p>${product.price}€</p>
-                        </div>
-                        <div class="cart__item__content__settings">
-                            <div class="cart__item__content__settings__quantity">
-                            <p>Qté : </p>
-                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${panier.quantité}">
+                            <div class="cart__item__img">
+                                <img src="${product.imageUrl}" alt="${product.altTxt}">
                             </div>
-                            <div class="cart__item__content__settings__delete">
-                            <p class="deleteItem">Supprimer</p>
+                            <div class="cart__item__content">
+                                <div class="cart__item__content__description">
+                                    <h2>${product.name}</h2>
+                                    <p>${panier.color}</p>
+                                    <p>${product.price}€</p>
+                                </div>
+                                <div class="cart__item__content__settings" id="${panier.id +"-"+ panier.color}">
+                                    <div class="cart__item__content__settings__quantity">
+                                        <p>Qté : </p>
+                                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${panier.quantité}">
+                                    </div>
+                                    <div class="cart__item__content__settings__delete">
+                                        <p class="deleteItem">Supprimer</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        </div>
                         </article>`;
-                    prixTotal += product.price;
+                    prixTotal += product.price*panier.quantité;
                     quantityTotal += parseInt(panier.quantité);
                     document.getElementById("totalPrice").innerText = prixTotal;
                     document.getElementById("totalQuantity").innerText = quantityTotal;
             }
-            }
-            
-            
-        }
-        
+            }            
+        }   
     })
     .catch (function(err){
         alert("erreur");
     })
 }
 get();
+document.addEventListener('click', function(event){
+    let recupClé = event.target.parentNode;
+    let clé = recupClé.parentNode.id
+    if(JSON.parse(localStorage.getItem(clé)) && event.target.className == "deleteItem"){
+        
+        localStorage.removeItem(clé);
+        get();
+    }
+})
+document.addEventListener('input', function(event){
+    let recupClé = event.target.parentNode;
+    let clé = recupClé.parentNode.id
+    if(JSON.parse(localStorage.getItem(clé)) && event.target.className == "itemQuantity"){
+        let idAndColor = clé.split('-');
+        let newQuantity = {
+            id : idAndColor[0],
+            color : idAndColor[1],
+            quantité : event.target.value
+        };
+        localStorage.setItem(clé, JSON.stringify(newQuantity));
+        get();
+    }
+})
+
+
+
+
+
+
 
 
 

@@ -19,18 +19,19 @@ function getProduct(id){
 
     })
 }
-
+var url = document.location.href;
 var idProduct = url.substring(url.lastIndexOf("id=")+3);
 getProduct(idProduct);
 
 document.getElementById("addToCart").addEventListener('click',function(){
     if (document.getElementById("colors").value !== "" && document.getElementById("quantity").value != 0){
-        var newChoice = new choixProduit (
-            idProduct,
-            document.getElementById("colors").value,
-            parseInt(document.getElementById("quantity").value));
+        let newChoice = {
+            id : idProduct,
+            color : document.getElementById("colors").value,
+            quantité : parseInt(document.getElementById("quantity").value)
+        };
 
-           localStorage.setItem(idProduct + newChoice.color , JSON.stringify(newChoice));
+           localStorage.setItem(idProduct +"-"+ newChoice.color , JSON.stringify(newChoice));
            console.log(JSON.parse(localStorage.getItem(idProduct+ newChoice.color)))
             
     }else{
