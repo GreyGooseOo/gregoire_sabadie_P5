@@ -30,9 +30,12 @@ document.getElementById("addToCart").addEventListener('click',function(){
             color : document.getElementById("colors").value,
             quantité : parseInt(document.getElementById("quantity").value)
         };
-
-           localStorage.setItem(idProduct +"-"+ newChoice.color , JSON.stringify(newChoice));
-           console.log(JSON.parse(localStorage.getItem(idProduct+ newChoice.color)))
+        if(localStorage.getItem(idProduct +"-"+ newChoice.color)){
+            
+            newChoice.quantité += JSON.parse(localStorage.getItem(idProduct +"-"+ newChoice.color)).quantité;
+        }        
+        localStorage.setItem(idProduct +"-"+ newChoice.color , JSON.stringify(newChoice));
+        console.log(JSON.parse(localStorage.getItem(idProduct+ newChoice.color)))
             
     }else{
         if (document.getElementById("colors").value === ""){
