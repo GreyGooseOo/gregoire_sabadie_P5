@@ -106,11 +106,11 @@ document.getElementById("order").addEventListener('click',function(event){
         alert ("Merci de remplir correctement les champs du formulaire");
     }else{
         var newForm = {
-            firstName : document.getElementById("firstName").textContent,
-            lastName : document.getElementById("lastName").textContent,
-            address : document.getElementById("address").textContent,
-            city : document.getElementById("city").textContent,
-            email : document.getElementById("email").textContent
+            firstName : document.getElementById("firstName").value,
+            lastName : document.getElementById("lastName").value,
+            address : document.getElementById("address").value,
+            city : document.getElementById("city").value,
+            email : document.getElementById("email").value
         }
         event.preventDefault();
         fetch("http://localhost:3000/api/products/order", {
@@ -118,10 +118,16 @@ document.getElementById("order").addEventListener('click',function(event){
         headers: {
             'Content-Type': 'application/json'
          },
-        body: JSON.stringify({contact: newForm, produits: arrayProductId})
+        body: JSON.stringify({contact: newForm, products: arrayProductId})
         })
-        .then(function(verif){
-            console.log(verif);
+
+        .then(function(res) {
+            if (res.ok) {
+              return res.json();
+            }
+        })
+          .then(function(value) {
+            console.log(value.orderId);
         })
         .catch (function(err){
             alert("erreur");
