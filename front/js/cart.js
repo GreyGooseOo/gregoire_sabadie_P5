@@ -1,3 +1,4 @@
+var arrayProductId =[];
 const tableauForm = [
     {title : "firstName",regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
     {title : "lastName", regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
@@ -8,7 +9,6 @@ const tableauForm = [
 for (let element of tableauForm){
     document.getElementById(element.title).addEventListener("input", function(elt) {
         if (element.regex.test(elt.target.value)) {
-                console.log(document.getElementById(element.title).value);
                 document.getElementById(element.title + "ErrorMsg").innerText = "";
         } else {
             document.getElementById(element.title + "ErrorMsg").innerText = "Non valide";
@@ -32,7 +32,9 @@ function get(){
         for(let product of products){
             for(let color of product.colors){
                 var panier = JSON.parse(localStorage.getItem(product._id+"-"+color));
+                
                 if(panier){
+                    arrayProductId.push(panier.id);
                     document.getElementById("cart__items").innerHTML += 
                         `<article class="cart__item" data-id="${panier.id}" data-color="${panier.color}">
                             <div class="cart__item__img">
@@ -91,19 +93,38 @@ document.addEventListener('input', function(event){
         get();
     }
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+document.getElementById("order").addEventListener('click',function(event){
     
+    var errForm = false;
+    for( let element of tableauForm){
+        if(document.getElementById(element.title + "ErrorMsg").textContent){
+            errForm = true;
+        } 
+    }
+    if (errForm){
+        event.preventDefault();
+        alert ("Merci de remplir correctement les champs du formulaire");
+    }else{
+        var newForm = {
+            firstName : document.getElementById("firstName").textContent,
+            lastName : document.getElementById("lastName").textContent,
+            address : document.getElementById("address").textContent,
+            city : document.getElementById("city").textContent,
+            email : document.getElementById("email").textContent
+        }
+        event.preventDefault();
+        fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+         },
+        body: JSON.stringify({contact: newForm, produits: arrayProductId})
+        })
+        .then(function(verif){
+            console.log(verif);
+        })
+        .catch (function(err){
+            alert("erreur");
+        })
+    }
+},false)
