@@ -26,6 +26,7 @@ function get(){
     .then(function(products){
         var prixTotal = 0;
         var quantityTotal = 0;
+        arrayProductId =[];
         document.getElementById("cart__items").innerHTML = "";
         document.getElementById("totalPrice").innerText = 0;
         document.getElementById("totalQuantity").innerText = 0;
@@ -94,10 +95,9 @@ document.addEventListener('input', function(event){
     }
 })
 document.getElementById("order").addEventListener('click',function(event){
-    
     var errForm = false;
     for( let element of tableauForm){
-        if(document.getElementById(element.title + "ErrorMsg").textContent){
+        if(document.getElementById(element.title + "ErrorMsg").textContent || document.getElementById(element.title).value ==""){
             errForm = true;
         } 
     }
@@ -127,7 +127,8 @@ document.getElementById("order").addEventListener('click',function(event){
             }
         })
           .then(function(value) {
-            console.log(value.orderId);
+            var newUlr = document.location.href.replace('cart.html','confirmation.html');
+            document.location.href = newUlr;
         })
         .catch (function(err){
             alert("erreur");
