@@ -1,4 +1,4 @@
-// création de la fonction qui recupère les information des produits dans l'API
+//fonction qui recupère les information des produits dans l'API
 function get(){
     fetch("http://localhost:3000/api/products")
     .then (function(res){
