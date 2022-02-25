@@ -1,4 +1,6 @@
 // variable du tableau de string contenant les ID des produit du panier
+var prixTotal;
+var quantityTotal;
 var arrayProductId =[];
 // tableau contenant les différents ID du formulaire et les regex correspondante
 const tableauForm = [
@@ -18,91 +20,87 @@ for (let element of tableauForm){
         }
 });
 }
-//fonction qui recupère les information des produits dans l'API
-function get(){
-    fetch("http://localhost:3000/api/products")
+function getProduct(id,color,quantité){
+    fetch("http://localhost:3000/api/products" + "/" + id)
     .then (function(res){
         if(res.ok){
             return  res.json();        
         }
     })
-    .then(function(products){
-        //remise a zero de l'affichage du panier
-        var prixTotal = 0;
-        var quantityTotal = 0;
-        arrayProductId =[];
-        document.getElementById("cart__items").innerHTML = "";
-        document.getElementById("totalPrice").innerText = 0;
-        document.getElementById("totalQuantity").innerText = 0;
-        // vérification de la présence d'un produit dans le panier avec son ID et sa couleur en fonction de la clé du localStorage
-        for(let product of products){
-            for(let color of product.colors){
-                var panier = JSON.parse(localStorage.getItem(product._id+"-"+color));
-            
-                if(panier){
-                    arrayProductId.push(panier.id);
-                    document.getElementById("cart__items").innerHTML +=
-                    // pour pouvoir modifer la qté ou supprimer, ajout de la clé du local corresspopndante au produit pour connaitre le produit a modifier
-                        `<article class="cart__item" data-id="${panier.id}" data-color="${panier.color}">
-                            <div class="cart__item__img">
-                                <img src="${product.imageUrl}" alt="${product.altTxt}">
-                            </div>
-                            <div class="cart__item__content">
-                                <div class="cart__item__content__description">
-                                    <h2>${product.name}</h2>
-                                    <p>${panier.color}</p>
-                                    <p>${product.price}€</p>
-                                </div>
-                                <div class="cart__item__content__settings" id="${panier.id +"-"+ panier.color}">
-                                    <div class="cart__item__content__settings__quantity">
-                                        <p>Qté : </p>
-                                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${panier.quantité}">
-                                    </div>
-                                    <div class="cart__item__content__settings__delete">
-                                        <p class="deleteItem">Supprimer</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </article>`;
-                    // calcul du prix et de la qté total et implantation
-                    prixTotal += product.price*panier.quantité;
-                    quantityTotal += parseInt(panier.quantité);
-                    document.getElementById("totalPrice").innerText = prixTotal;
-                    document.getElementById("totalQuantity").innerText = quantityTotal;
-            }
-            }            
-        }   
+    .then(function(product){
+        document.getElementById("cart__items").innerHTML +=
+        `<article class="cart__item" data-id="${id}" data-color="${color}">
+                <div class="cart__item__img">
+                    <img src="${product.imageUrl}" alt="${product.altTxt}">
+                </div>
+                <div class="cart__item__content">
+                    <div class="cart__item__content__description">
+                        <h2>${product.name}</h2>
+                        <p>${color}</p>
+                        <p>${product.price}€</p>
+                    </div>
+                    <div class="cart__item__content__settings">
+                        <div class="cart__item__content__settings__quantity">
+                            <p>Qté : </p>
+                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${quantité}" data-id="${id}" data-color="${color}">
+                        </div>
+                        <div class="cart__item__content__settings__delete">
+                            <p class="deleteItem" data-id="${id}" data-color="${color}">Supprimer</p>
+                        </div>
+                    </div>
+                </div>
+            </article>`;
+            prixTotal += product.price*quantité;
+            quantityTotal += parseInt(quantité);
+            document.getElementById("totalPrice").innerText = prixTotal;
+            document.getElementById("totalQuantity").innerText = quantityTotal;
     })
     .catch (function(err){
-        alert("Le panier n'as pas été récupéré");
+
     })
 }
-get();
-// fonction pour supprimer un élement du panier
+function buildPanier(){
+    prixTotal = 0;
+    quantityTotal = 0;
+    document.getElementById("cart__items").innerHTML = "";
+    var panier = JSON.parse(localStorage.getItem('panier'));
+    for (let product of panier){
+    getProduct(product.id,product.color,product.quantité);
+}
+}
+buildPanier();
+
+//supprimer un élement du panier
 document.addEventListener('click', function(event){
-    let recupClé = event.target.parentNode;
-    let clé = recupClé.parentNode.id
-    if(JSON.parse(localStorage.getItem(clé)) && event.target.className == "deleteItem"){
-        
-        localStorage.removeItem(clé);
-        get(); //l'appel de cette fonction permet 'l'actualisation' du panier grace a la remise a zero du debut de cette fonction
+    if(event.target.className == "deleteItem"){
+        var panier = JSON.parse(localStorage.getItem('panier'));
+        for (let product of panier){
+            if(product.id == event.target.dataset.id && product.color == event.target.dataset.color){
+                panier.unshift(product);
+            };
+        }
+        localStorage.setItem('panier', JSON.stringify(panier.sort()));
+        buildPanier();
+
     }
 })
+
+
 //modification de la qté
 document.addEventListener('input', function(event){
-    let recupClé = event.target.parentNode;
-    let clé = recupClé.parentNode.id
-    if(JSON.parse(localStorage.getItem(clé)) && event.target.className == "itemQuantity"){
-        let idAndColor = clé.split('-');
-        let newQuantity = {
-            id : idAndColor[0],
-            color : idAndColor[1],
-            quantité : event.target.value
-        };
-        localStorage.setItem(clé, JSON.stringify(newQuantity));
-        get();
+    if(event.target.className == "itemQuantity"){
+        var panier = JSON.parse(localStorage.getItem('panier'));
+        for (let product of panier){
+            if(product.id == event.target.dataset.id && product.color == event.target.dataset.color){
+                product.quantité = event.target.value;
+            };
+        }
+        localStorage.setItem('panier', JSON.stringify(panier.sort()));
+        buildPanier();
+
     }
 })
+
 // lorsque que l'utilisateur clique sur commander
 document.getElementById("order").addEventListener('click',function(event){
     var errForm = false;

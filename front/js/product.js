@@ -20,7 +20,7 @@ function getProduct(id){
 
     })
 }
-
+var panier = [];
 var url = document.location.href;
 var idProduct = url.substring(url.lastIndexOf("id=")+3);
 getProduct(idProduct);
@@ -33,16 +33,24 @@ document.getElementById("addToCart").addEventListener('click',function(){
             color : document.getElementById("colors").value,
             quantité : parseInt(document.getElementById("quantity").value)
         };
-        //ajout de qté supplémentaire si le produit a deja été selectionné
-        if(localStorage.getItem(idProduct +"-"+ newChoice.color)){
-            
-            newChoice.quantité += JSON.parse(localStorage.getItem(idProduct +"-"+ newChoice.color)).quantité;
+        if (localStorage.getItem('panier')){       
+            panier = JSON.parse(localStorage.getItem('panier'));
+            var doublon = false;
+            for (let product of panier){
+                if(product.id == newChoice.id && product.color == newChoice.color){
+                    product.quantité += newChoice.quantité;
+                    doublon = true;
+                }
+            }
+            if(doublon == false){
+                panier.push(newChoice);
+            }
+            localStorage.setItem('panier', JSON.stringify(panier.sort()));   
+        }else{
+            panier = [newChoice],
+            localStorage.setItem('panier', JSON.stringify(panier));
         }
-        /* implantation d'un objet contenant l'id,la couleur et la qté d'un produit dans le local storage
-        avec la clé correspondant à l'id et la couleur pour les différencier */     
-        localStorage.setItem(idProduct +"-"+ newChoice.color , JSON.stringify(newChoice));
-        alert("Le produit a bien été ajouté au panier")
-            
+        alert("Le produit a bien été ajouté au panier")       
     }else{
         //message d'erreur si les champs ne sont pas reseingé
         if (document.getElementById("colors").value === ""){
