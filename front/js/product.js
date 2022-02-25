@@ -41,7 +41,7 @@ document.getElementById("addToCart").addEventListener('click',function(){
         /* implantation d'un objet contenant l'id,la couleur et la qté d'un produit dans le local storage
         avec la clé correspondant à l'id et la couleur pour les différencier */     
         localStorage.setItem(idProduct +"-"+ newChoice.color , JSON.stringify(newChoice));
-        console.log(JSON.parse(localStorage.getItem(idProduct+ newChoice.color)))
+        alert("Le produit a bien été ajouté au panier")
             
     }else{
         //message d'erreur si les champs ne sont pas reseingé

@@ -4,7 +4,7 @@ var arrayProductId =[];
 const tableauForm = [
     {title : "firstName",regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
     {title : "lastName", regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
-    {title : "address", regex : /([0-9]*) ?([a-zA-Z,\. ]*) ?([0-9]{5}) ?([a-zA-Z]*)/},
+    {title : "address", regex : /([0-9]*) ?([a-zA-Z,\. ]*) ?([a-zA-Z]*)/},
     {title : "city", regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
     {title : "email", regex : /^[a-z0-9._-]+@[a-z0-9._-]{2,}\.[a-z]{2,4}$/},
 ]
@@ -131,7 +131,7 @@ document.getElementById("order").addEventListener('click',function(event){
         //message d'erreur si le tableau ne contient pas ce qu'il faut
         if(errTableauId){
             event.preventDefault();
-            alert ("Erreur : panier vide ou mauvaise ID des produits");
+            alert ("Erreur : panier vide ou produits inexistant");
         }else{
             //envoi du panier dans l'API
             var newForm = {
@@ -157,6 +157,8 @@ document.getElementById("order").addEventListener('click',function(event){
             })
             //recupération du numéro de commande et implantation dans l'url de comfirmation
               .then(function(value) {
+                //suppression du panier
+                localStorage.clear();
                 var newUlr = document.location.href.replace('cart.html','confirmation.html?orderId='+ value.orderId);
                 document.location.href = newUlr;
             })
