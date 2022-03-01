@@ -2,6 +2,7 @@
 var prixTotal;
 var quantityTotal;
 var arrayProductId =[];
+var panier = JSON.parse(localStorage.getItem('panier'));
 // tableau contenant les différents ID du formulaire et les regex correspondante
 const tableauForm = [
     {title : "firstName",regex : /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/},
@@ -20,32 +21,35 @@ for (let element of tableauForm){
         }
 });
 }
-function getProduct(id,color,quantité){
-    fetch("http://localhost:3000/api/products" + "/" + id)
+prixTotal = 0;
+quantityTotal = 0;
+document.getElementById("cart__items").innerHTML = "";
+for (let product of panier){
+    fetch("http://localhost:3000/api/products" + "/" + product.id)
     .then (function(res){
         if(res.ok){
             return  res.json();        
         }
     })
-    .then(function(product){
+    .then(function(api){
         document.getElementById("cart__items").innerHTML +=
-        `<article class="cart__item" data-id="${id}" data-color="${color}">
+        `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
                 <div class="cart__item__img">
-                    <img src="${product.imageUrl}" alt="${product.altTxt}">
+                    <img src="${api.imageUrl}" alt="${api.altTxt}">
                 </div>
                 <div class="cart__item__content">
                     <div class="cart__item__content__description">
-                        <h2>${product.name}</h2>
-                        <p>${color}</p>
-                        <p>${product.price}€</p>
+                        <h2>${api.name}</h2>
+                        <p>${product.color}</p>
+                        <p>${api.price}€</p>
                     </div>
                     <div class="cart__item__content__settings">
                         <div class="cart__item__content__settings__quantity">
                             <p>Qté : </p>
-                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${quantité}" data-id="${id}" data-color="${color}">
+                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantité}" data-id="${product.id}" data-color="${product.color}">
                         </div>
                         <div class="cart__item__content__settings__delete">
-                            <p class="deleteItem" data-id="${id}" data-color="${color}">Supprimer</p>
+                            <p class="deleteItem" data-id="${product.id}" data-color="${product.color}">Supprimer</p>
                         </div>
                     </div>
                 </div>
@@ -59,33 +63,27 @@ function getProduct(id,color,quantité){
 
     })
 }
-function buildPanier(){
-    prixTotal = 0;
-    quantityTotal = 0;
-    document.getElementById("cart__items").innerHTML = "";
-    var panier = JSON.parse(localStorage.getItem('panier'));
-    for (let product of panier){
-    getProduct(product.id,product.color,product.quantité);
-}
-}
-buildPanier();
 
+
+var btnSuppr = document.querySelectorAll('.deleteItem');
+var ModifQté = document.querySelectorAll('.itemQuantity');
+console.log(btnSuppr);
+    console.log(ModifQté);
 //supprimer un élement du panier
-document.addEventListener('click', function(event){
-    if(event.target.className == "deleteItem"){
-        var panier = JSON.parse(localStorage.getItem('panier'));
+
+for(let bouton of btnSuppr){
+    
+    bouton.addEventListener('click', function () {
         for (let product of panier){
-            if(product.id == event.target.dataset.id && product.color == event.target.dataset.color){
+            if(product.id == bouton.dataset.id && product.color == bouton.dataset.color){
                 panier.unshift(product);
+                localStorage.setItem('panier', JSON.stringify(panier));
+                buildPanier();
             };
         }
-        localStorage.setItem('panier', JSON.stringify(panier.sort()));
-        buildPanier();
-
-    }
-})
-
-
+        
+      })
+}
 //modification de la qté
 document.addEventListener('input', function(event){
     if(event.target.className == "itemQuantity"){
