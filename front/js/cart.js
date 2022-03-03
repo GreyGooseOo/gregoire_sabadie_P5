@@ -34,7 +34,7 @@ function buildPanier(){
         fetch("http://localhost:3000/api/products" + "/" + product.id)
         .then (function(res){
             if(res.ok){
-                return  res.json();        
+                return  res.json();    
             }
         })
         .then(function(api){
@@ -70,13 +70,11 @@ function buildPanier(){
         .catch (function(err){
 
         })
-}
-
+    }
 }
 if(panier){
     buildPanier();
 }
-
 
 //supprimer un élement du panier
 function supprimer(){
