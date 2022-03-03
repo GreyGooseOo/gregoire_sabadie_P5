@@ -19,15 +19,18 @@ for (let element of tableauForm){
         } else {
             document.getElementById(element.title + "ErrorMsg").innerText = "Non valide";
         }
-});
+    });
 }
+//création du panier
 function buildPanier(){
+    arrayProductId =[];
     prixTotal = 0;
     quantityTotal = 0;
     document.getElementById("cart__items").innerHTML = "";
     document.getElementById("totalPrice").innerText = 0;
     document.getElementById("totalQuantity").innerText = "";
     for (let product of panier){
+        arrayProductId.push(product.id);
         fetch("http://localhost:3000/api/products" + "/" + product.id)
         .then (function(res){
             if(res.ok){
@@ -69,7 +72,10 @@ function buildPanier(){
 setTimeout(supprimer, 500);
 setTimeout(choixQuantity, 500);
 }
-buildPanier();
+if(panier){
+    buildPanier();
+}
+
 
 //supprimer un élement du panier
 function supprimer(){
@@ -93,16 +99,15 @@ function supprimer(){
 function choixQuantity(){
     var ModifQté = document.querySelectorAll('.itemQuantity');
     for (let input of ModifQté){
-        document.addEventListener('change', function(event){
+        input.addEventListener('change', function(event){
             for (let product of panier){
                 if(product.id === input.dataset.id && product.color === input.dataset.color){
                     product.quantité = input.value;
-                    console.log(panier);
                     localStorage.setItem('panier', JSON.stringify(panier));
+                    buildPanier();
                 };
             }
-            event.stopPropagation();
-            buildPanier();
+            
             
         })
     }
