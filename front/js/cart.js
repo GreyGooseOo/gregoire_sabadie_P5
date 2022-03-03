@@ -21,83 +21,92 @@ for (let element of tableauForm){
         }
 });
 }
-prixTotal = 0;
-quantityTotal = 0;
-document.getElementById("cart__items").innerHTML = "";
-for (let product of panier){
-    fetch("http://localhost:3000/api/products" + "/" + product.id)
-    .then (function(res){
-        if(res.ok){
-            return  res.json();        
-        }
-    })
-    .then(function(api){
-        document.getElementById("cart__items").innerHTML +=
-        `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
-                <div class="cart__item__img">
-                    <img src="${api.imageUrl}" alt="${api.altTxt}">
-                </div>
-                <div class="cart__item__content">
-                    <div class="cart__item__content__description">
-                        <h2>${api.name}</h2>
-                        <p>${product.color}</p>
-                        <p>${api.price}€</p>
+function buildPanier(){
+    prixTotal = 0;
+    quantityTotal = 0;
+    document.getElementById("cart__items").innerHTML = "";
+    document.getElementById("totalPrice").innerText = 0;
+    document.getElementById("totalQuantity").innerText = "";
+    for (let product of panier){
+        fetch("http://localhost:3000/api/products" + "/" + product.id)
+        .then (function(res){
+            if(res.ok){
+                return  res.json();        
+            }
+        })
+        .then(function(api){
+            document.getElementById("cart__items").innerHTML +=
+            `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
+                    <div class="cart__item__img">
+                        <img src="${api.imageUrl}" alt="${api.altTxt}">
                     </div>
-                    <div class="cart__item__content__settings">
-                        <div class="cart__item__content__settings__quantity">
-                            <p>Qté : </p>
-                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantité}" data-id="${product.id}" data-color="${product.color}">
+                    <div class="cart__item__content">
+                        <div class="cart__item__content__description">
+                            <h2>${api.name}</h2>
+                            <p>${product.color}</p>
+                            <p>${api.price}€</p>
                         </div>
-                        <div class="cart__item__content__settings__delete">
-                            <p class="deleteItem" data-id="${product.id}" data-color="${product.color}">Supprimer</p>
+                        <div class="cart__item__content__settings">
+                            <div class="cart__item__content__settings__quantity">
+                                <p>Qté : </p>
+                                <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantité}" data-id="${product.id}" data-color="${product.color}">
+                            </div>
+                            <div class="cart__item__content__settings__delete">
+                                <p class="deleteItem" data-id="${product.id}" data-color="${product.color}">Supprimer</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </article>`;
-            prixTotal += product.price*quantité;
-            quantityTotal += parseInt(quantité);
-            document.getElementById("totalPrice").innerText = prixTotal;
-            document.getElementById("totalQuantity").innerText = quantityTotal;
-    })
-    .catch (function(err){
+                </article>`;
+                prixTotal += api.price*product.quantité;
+                quantityTotal += parseInt(product.quantité);
+                document.getElementById("totalPrice").innerText = prixTotal;
+                document.getElementById("totalQuantity").innerText = quantityTotal;
+        })
+        .catch (function(err){
 
-    })
+        })
 }
+setTimeout(supprimer, 500);
+setTimeout(choixQuantity, 500);
+}
+buildPanier();
 
-
-var btnSuppr = document.querySelectorAll('.deleteItem');
-var ModifQté = document.querySelectorAll('.itemQuantity');
-console.log(btnSuppr);
-    console.log(ModifQté);
 //supprimer un élement du panier
-
-for(let bouton of btnSuppr){
-    
-    bouton.addEventListener('click', function () {
+function supprimer(){
+    var btnSuppr = document.querySelectorAll('.deleteItem');
+    for (let button of btnSuppr)
+    button.addEventListener('click',function () {
+        let i = 0;
         for (let product of panier){
-            if(product.id == bouton.dataset.id && product.color == bouton.dataset.color){
-                panier.unshift(product);
+            if(product.id === button.dataset.id && product.color === button.dataset.color){
+                panier.splice(i,1);
                 localStorage.setItem('panier', JSON.stringify(panier));
                 buildPanier();
             };
+            i++;
         }
-        
-      })
-}
+    
+    })
+ }
+    
 //modification de la qté
-document.addEventListener('input', function(event){
-    if(event.target.className == "itemQuantity"){
-        var panier = JSON.parse(localStorage.getItem('panier'));
-        for (let product of panier){
-            if(product.id == event.target.dataset.id && product.color == event.target.dataset.color){
-                product.quantité = event.target.value;
-            };
-        }
-        localStorage.setItem('panier', JSON.stringify(panier.sort()));
-        buildPanier();
-
+function choixQuantity(){
+    var ModifQté = document.querySelectorAll('.itemQuantity');
+    for (let input of ModifQté){
+        document.addEventListener('change', function(event){
+            for (let product of panier){
+                if(product.id === input.dataset.id && product.color === input.dataset.color){
+                    product.quantité = input.value;
+                    console.log(panier);
+                    localStorage.setItem('panier', JSON.stringify(panier));
+                };
+            }
+            event.stopPropagation();
+            buildPanier();
+            
+        })
     }
-})
+}
 
 // lorsque que l'utilisateur clique sur commander
 document.getElementById("order").addEventListener('click',function(event){
