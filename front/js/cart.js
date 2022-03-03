@@ -64,13 +64,14 @@ function buildPanier(){
                 quantityTotal += parseInt(product.quantité);
                 document.getElementById("totalPrice").innerText = prixTotal;
                 document.getElementById("totalQuantity").innerText = quantityTotal;
+                supprimer();
+                choixQuantity();
         })
         .catch (function(err){
 
         })
 }
-setTimeout(supprimer, 500);
-setTimeout(choixQuantity, 500);
+
 }
 if(panier){
     buildPanier();
@@ -99,7 +100,7 @@ function supprimer(){
 function choixQuantity(){
     var ModifQté = document.querySelectorAll('.itemQuantity');
     for (let input of ModifQté){
-        input.addEventListener('change', function(event){
+        input.addEventListener('change', function(){
             for (let product of panier){
                 if(product.id === input.dataset.id && product.color === input.dataset.color){
                     product.quantité = input.value;
