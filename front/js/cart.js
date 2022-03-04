@@ -1,7 +1,9 @@
 // variable du tableau de string contenant les ID des produit du panier
 var prixTotal;
 var quantityTotal;
-var arrayProductId =[];
+var panierIdUnique = [];
+var arrayProductId = [];
+var tableauPromise = [];
 var panier = JSON.parse(localStorage.getItem('panier'));
 // tableau contenant les différents ID du formulaire et les regex correspondante
 const tableauForm = [
@@ -21,6 +23,27 @@ for (let element of tableauForm){
         }
     });
 }
+//création d'un tableau contenant 1 seule fois les id des produits du panier
+panierIdUnique = [...new Set(panier.map(elt => elt.id))]
+//appel de L'api pour les id selectionné
+for (let product of panierIdUnique){
+    tableauPromise.push(
+    fetch("http://localhost:3000/api/products" + "/" + product)
+    .then (function(res){
+        if(res.ok){
+            return  res.json();    
+        }
+    })
+    .then(function(api){
+        return Promise.resolve(api);
+        
+        
+    })
+    .catch (function(err){
+        return Promise.reject("erreur produit");
+
+    }))
+}
 //création du panier
 function buildPanier(){
     arrayProductId =[];
@@ -29,48 +52,46 @@ function buildPanier(){
     document.getElementById("cart__items").innerHTML = "";
     document.getElementById("totalPrice").innerText = 0;
     document.getElementById("totalQuantity").innerText = "";
-    for (let product of panier){
-        arrayProductId.push(product.id);
-        fetch("http://localhost:3000/api/products" + "/" + product.id)
-        .then (function(res){
-            if(res.ok){
-                return  res.json();    
-            }
-        })
+    Promise.all(tableauPromise)
         .then(function(api){
-            document.getElementById("cart__items").innerHTML +=
-            `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
-                    <div class="cart__item__img">
-                        <img src="${api.imageUrl}" alt="${api.altTxt}">
-                    </div>
-                    <div class="cart__item__content">
-                        <div class="cart__item__content__description">
-                            <h2>${api.name}</h2>
-                            <p>${product.color}</p>
-                            <p>${api.price}€</p>
+            let i;
+            for (let product of panier){
+                i = api.map(elt => elt._id).indexOf(product.id);
+                console.log(i);
+                document.getElementById("cart__items").innerHTML +=
+                `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
+                        <div class="cart__item__img">
+                            <img src="${api[i].imageUrl}" alt="${api[i].altTxt}">
                         </div>
-                        <div class="cart__item__content__settings">
-                            <div class="cart__item__content__settings__quantity">
-                                <p>Qté : </p>
-                                <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantité}" data-id="${product.id}" data-color="${product.color}">
+                        <div class="cart__item__content">
+                            <div class="cart__item__content__description">
+                                <h2>${api[i].name}</h2>
+                                <p>${product.color}</p>
+                                <p>${api[i].price}€</p>
                             </div>
-                            <div class="cart__item__content__settings__delete">
-                                <p class="deleteItem" data-id="${product.id}" data-color="${product.color}">Supprimer</p>
+                            <div class="cart__item__content__settings">
+                                <div class="cart__item__content__settings__quantity">
+                                    <p>Qté : </p>
+                                    <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${product.quantité}" data-id="${product.id}" data-color="${product.color}">
+                                </div>
+                                <div class="cart__item__content__settings__delete">
+                                    <p class="deleteItem" data-id="${product.id}" data-color="${product.color}">Supprimer</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </article>`;
-                prixTotal += api.price*product.quantité;
-                quantityTotal += parseInt(product.quantité);
-                document.getElementById("totalPrice").innerText = prixTotal;
-                document.getElementById("totalQuantity").innerText = quantityTotal;
-                supprimer();
-                choixQuantity();
+                    </article>`;
+                    prixTotal += api[i].price*product.quantité;
+                    quantityTotal += parseInt(product.quantité);
+                    document.getElementById("totalPrice").innerText = prixTotal;
+                    document.getElementById("totalQuantity").innerText = quantityTotal;
+                    supprimer();
+                    choixQuantity();
+            }
+            
         })
-        .catch (function(err){
-
+        .catch(function(err){
+            alert(err);
         })
-    }
 }
 if(panier){
     buildPanier();
