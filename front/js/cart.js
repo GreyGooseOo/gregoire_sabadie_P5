@@ -23,8 +23,10 @@ for (let element of tableauForm){
         }
     });
 }
-//création d'un tableau contenant 1 seule fois les id des produits du panier
-panierIdUnique = [...new Set(panier.map(elt => elt.id))]
+if(panier){
+    //création d'un tableau contenant 1 seule fois les id des produits du panier
+    panierIdUnique = [...new Set(panier.map(elt => elt.id))]
+}
 //appel de L'api pour les id selectionné
 for (let product of panierIdUnique){
     tableauPromise.push(
@@ -44,6 +46,7 @@ for (let product of panierIdUnique){
 
     }))
 }
+
 //création du panier
 function buildPanier(){
     arrayProductId =[];
@@ -93,7 +96,7 @@ function buildPanier(){
             alert(err);
         })
 }
-if(panier){
+if (panier){
     buildPanier();
 }
 
