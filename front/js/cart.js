@@ -56,7 +56,7 @@ function buildPanier(){
         .then(function(api){
             let i;
             for (let product of panier){
-                arrayProductId += product.id;
+                arrayProductId.push(product.id);
                 i = api.map(elt => elt._id).indexOf(product.id);
                 document.getElementById("cart__items").innerHTML +=
                 `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
